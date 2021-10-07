@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SimpleInjector;
 
 namespace SimpleInjectorIssue928
 {
     public class Startup
     {
+        private readonly Container _container = new();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -19,6 +22,22 @@ namespace SimpleInjectorIssue928
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddSimpleInjector(_container,
+                                       options =>
+                                       {
+                                           options.AddAspNetCore()
+                                               .AddControllerActivation()
+                                               .AddViewComponentActivation()
+                                               .AddPageModelActivation()
+                                               .AddTagHelperActivation();
+                                       });
+            InitializeContainer();
+        }
+
+        private void InitializeContainer()
+        {
+            _container.RegisterInstance(new SomeDependency());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,6 +66,8 @@ namespace SimpleInjectorIssue928
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            _container.Verify();
         }
     }
 }

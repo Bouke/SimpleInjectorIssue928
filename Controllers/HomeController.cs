@@ -12,10 +12,12 @@ namespace SimpleInjectorIssue928.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly SomeDependency _someDependency;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SomeDependency someDependency)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _someDependency = someDependency ?? throw new ArgumentNullException(nameof(someDependency));
         }
 
         public IActionResult Index()
